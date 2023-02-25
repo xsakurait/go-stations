@@ -50,6 +50,10 @@ func realMain() error {
 	// set http handlers
 	mux := http.NewServeMux()
 
+	// サーバー起動
+	// 標準ライブラリでサーバーをポート8080で起動
+    http.ListenAndServe(":8080", mux)
+
 	// TODO: ここから実装を行う
 
 	return nil
