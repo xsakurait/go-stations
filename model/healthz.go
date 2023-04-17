@@ -1,4 +1,8 @@
 package model
 
 // A HealthzResponse expresses health check message.
-type HealthzResponse struct{}
+// 大文字で構造体変数宣言
+type HealthzResponse struct{
+	Message string `json:"message"`
+
+}

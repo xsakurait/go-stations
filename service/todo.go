@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"database/sql"
-
 	"github.com/TechBowl-japan/go-stations/model"
+	"log"
 )
 
 // A TODOService implements CRUD of TODO entities.
@@ -22,11 +22,30 @@ func NewTODOService(db *sql.DB) *TODOService {
 // CreateTODO creates a TODO on DB.
 func (s *TODOService) CreateTODO(ctx context.Context, subject, description string) (*model.TODO, error) {
 	const (
-		insert  = `INSERT INTO todos(subject, description) VALUES(?, ?)`
+		insert  = "INSERT INTO todos(subject, description) VALUES(?, ?)"
 		confirm = `SELECT subject, description, created_at, updated_at FROM todos WHERE id = ?`
 	)
+	// ctx=関数の第１引数はrequestオブジェクトみたいなものでcontext.Context型と呼ばれる　エラー等を制御する役割を担う
+	stmt, err := s.db.ExecContext(ctx, insert, subject, description)
+	if err != nil {
+		log.Fatal("server/todo.go s.db.ExecContext(ctx,insert,subject,description)", err)
+		return  nil,err
+	}
+	insert_id, err := stmt.LastInsertId()
+	if err != nil {
+		log.Fatal("server/todo.go stmt.LastInsertId()", err)
+		return nil,err
 
-	return nil, nil
+	}
+	var todo model.TODO
+	err = s.db.QueryRowContext(ctx, confirm, insert_id).Scan(&todo.Subject, &todo.Description, &todo.CreatedAt, &todo.UpdatedAt)
+	if err != nil {
+		log.Fatal("server/todo.go s.db.QueryRowContext(ctx,confirm,insert_id).Scan(&todo.Subject,&todo.Description,&todo.CreatedAt,&todo.UpdatedAt)", err)
+		return nil,err
+
+	}
+
+	return &todo, err
 }
 
 // ReadTODO reads TODOs on DB.
